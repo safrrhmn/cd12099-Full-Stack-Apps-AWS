@@ -1,10 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util.js';
+import {deleteLocalFiles, filterImageFromURL} from "./util/util.js";
 
 
-
-  // Init the Express application
+// Init the Express application
   const app = express();
 
   // Set the network port
@@ -36,7 +35,23 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util.js';
   app.get( "/", async (req, res) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
-  
+
+app.get("/filteredimage", async (req, res) => {
+  let requestUrl = req.query?.image_url;
+  try {
+    new URL(requestUrl);
+  } catch (e) {
+    res.status(400).send("Bad Request")
+  }
+  let image = await filterImageFromURL(requestUrl);
+  //await deleteLocalFiles(image)
+  try {
+    res.sendFile(image);
+    res.on("finish", () => deleteLocalFiles([image]))
+  }catch (e){
+    res.status(500).send("Unknown Exception.")
+  }
+});
 
   // Start the Server
   app.listen( port, () => {
