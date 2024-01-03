@@ -43,9 +43,8 @@ app.get("/filteredimage", async (req, res) => {
   } catch (e) {
     res.status(400).send("Bad Request")
   }
-  let image = await filterImageFromURL(requestUrl);
-  //await deleteLocalFiles(image)
   try {
+    let image = await filterImageFromURL(requestUrl);
     res.sendFile(image);
     res.on("finish", () => deleteLocalFiles([image]))
   }catch (e){
@@ -58,3 +57,7 @@ app.get("/filteredimage", async (req, res) => {
       console.log( `server running http://localhost:${ port }` );
       console.log( `press CTRL+C to stop server` );
   } );
+
+process.on('uncaughtException', function (err) {
+  console.error(err);
+});
